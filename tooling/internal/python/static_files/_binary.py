@@ -1002,11 +1002,12 @@ class FixedVectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_
         # Reached when a fixed vector is a record field written via the numpy
         # record path. The value is a length-`self._length` subarray; dispatch
         # each element through the element serializer's numpy path.
-        if len(value) != self._length:
+        array = cast(npt.NDArray[T_NP], value)
+        if len(array) != self._length:
             raise ValueError(
-                f"Expected a subarray of length {self._length}, got {len(value)}"
+                f"Expected a subarray of length {self._length}, got {len(array)}"
             )
-        for element in value:
+        for element in array:
             self.element_serializer.write_numpy(stream, element)
 
     def read(self, stream: CodedInputStream) -> list[T]:
@@ -1037,20 +1038,27 @@ class VectorSerializer(Generic[T, T_NP], TypeSerializer[list[T], np.object_]):
         for element in value:
             self._element_serializer.write(stream, element)
 
-    def write_numpy(self, stream: CodedOutputStream, value: np.object_) -> None:
-        if not isinstance(value, list):
-            raise ValueError(f"Expected a list, got {type(value)}")
+    def write_numpy(self, stream: CodedOutputStream, value: object) -> None:
+        if isinstance(value, list):
+            self.write(stream, value)
+            return
+
+        if not isinstance(value, np.ndarray):
+            raise ValueError(f"Expected a list or ndarray, got {type(value)}")
+
+        if value.ndim != 1:
+            raise ValueError(f"Expected a 1-dimensional ndarray, got {value.ndim}")
 
         stream.write_unsigned_varint(len(value))
-        for element in cast(list[T], value):
-            self._element_serializer.write(stream, element)
+        for element in value:
+            self._element_serializer.write_numpy(stream, element)
 
     def read(self, stream: CodedInputStream) -> list[T]:
         length = stream.read_unsigned_varint()
         return [self._element_serializer.read(stream) for _ in range(length)]
 
     def read_numpy(self, stream: CodedInputStream) -> np.object_:
-        return np.object_(self.read(stream))  # pyright: ignore [reportReturnType]
+        return cast(np.object_, self.read(stream))
 
 
 TKey = TypeVar("TKey")

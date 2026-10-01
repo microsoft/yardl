@@ -2828,6 +2828,18 @@ void DynamicNDArraysWriter::WriteRecordWithDynamicNDArraysImpl(test_model::Recor
   yardl::hdf5::WriteScalarDataset<test_model::hdf5::_Inner_RecordWithDynamicNDArrays, test_model::RecordWithDynamicNDArrays>(group_, "recordWithDynamicNDArrays", test_model::hdf5::GetRecordWithDynamicNDArraysHdf5Ddl(), value);
 }
 
+void DynamicNDArraysWriter::WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>, yardl::DynamicNDArray<test_model::RecordWithFixedVectors>>(group_, "recWithFixedVectorsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>(test_model::hdf5::GetRecordWithFixedVectorsHdf5Ddl()), value);
+}
+
+void DynamicNDArraysWriter::WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>, yardl::DynamicNDArray<test_model::RecordWithOptionalFields>>(group_, "recWithOptionalFieldsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>(test_model::hdf5::GetRecordWithOptionalFieldsHdf5Ddl()), value);
+}
+
+void DynamicNDArraysWriter::WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) {
+  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>, yardl::DynamicNDArray<test_model::RecordWithStrings>>(group_, "recWithStringsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>(test_model::hdf5::GetRecordWithStringsHdf5Ddl()), value);
+}
+
 DynamicNDArraysReader::DynamicNDArraysReader(std::string path, bool skip_completed_check)
     : test_model::DynamicNDArraysReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "DynamicNDArrays", schema_) {
 }
@@ -2846,6 +2858,18 @@ void DynamicNDArraysReader::ReadRecordWithVlensArrayImpl(yardl::DynamicNDArray<t
 
 void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays& value) {
   yardl::hdf5::ReadScalarDataset<test_model::hdf5::_Inner_RecordWithDynamicNDArrays, test_model::RecordWithDynamicNDArrays>(group_, "recordWithDynamicNDArrays", test_model::hdf5::GetRecordWithDynamicNDArraysHdf5Ddl(), value);
+}
+
+void DynamicNDArraysReader::ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>, yardl::DynamicNDArray<test_model::RecordWithFixedVectors>>(group_, "recWithFixedVectorsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>(test_model::hdf5::GetRecordWithFixedVectorsHdf5Ddl()), value);
+}
+
+void DynamicNDArraysReader::ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>, yardl::DynamicNDArray<test_model::RecordWithOptionalFields>>(group_, "recWithOptionalFieldsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>(test_model::hdf5::GetRecordWithOptionalFieldsHdf5Ddl()), value);
+}
+
+void DynamicNDArraysReader::ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) {
+  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>, yardl::DynamicNDArray<test_model::RecordWithStrings>>(group_, "recWithStringsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>(test_model::hdf5::GetRecordWithStringsHdf5Ddl()), value);
 }
 
 MultiDArraysWriter::MultiDArraysWriter(std::string path)
@@ -3308,22 +3332,6 @@ void EnumsWriter::WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWith
   yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithEnums, test_model::RecordWithEnums>, yardl::DynamicNDArray<test_model::RecordWithEnums>>(group_, "recArray", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithEnums, test_model::RecordWithEnums>(test_model::hdf5::GetRecordWithEnumsHdf5Ddl()), value);
 }
 
-void EnumsWriter::WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>, yardl::DynamicNDArray<test_model::RecordWithFixedVectors>>(group_, "recWithFixedVectorsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>(test_model::hdf5::GetRecordWithFixedVectorsHdf5Ddl()), value);
-}
-
-void EnumsWriter::WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>, yardl::DynamicNDArray<test_model::RecordWithOptionalFields>>(group_, "recWithOptionalFieldsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>(test_model::hdf5::GetRecordWithOptionalFieldsHdf5Ddl()), value);
-}
-
-void EnumsWriter::WriteRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>, yardl::DynamicNDArray<test_model::RecordWithVlens>>(group_, "recWithVlensArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>(test_model::hdf5::GetRecordWithVlensHdf5Ddl()), value);
-}
-
-void EnumsWriter::WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) {
-  yardl::hdf5::WriteScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>, yardl::DynamicNDArray<test_model::RecordWithStrings>>(group_, "recWithStringsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>(test_model::hdf5::GetRecordWithStringsHdf5Ddl()), value);
-}
-
 EnumsReader::EnumsReader(std::string path, bool skip_completed_check)
     : test_model::EnumsReaderBase(skip_completed_check), yardl::hdf5::Hdf5Reader::Hdf5Reader(path, "Enums", schema_) {
 }
@@ -3346,22 +3354,6 @@ void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
 
 void EnumsReader::ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) {
   yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::RecordWithEnums, test_model::RecordWithEnums>, yardl::DynamicNDArray<test_model::RecordWithEnums>>(group_, "recArray", yardl::hdf5::DynamicNDArrayDdl<test_model::RecordWithEnums, test_model::RecordWithEnums>(test_model::hdf5::GetRecordWithEnumsHdf5Ddl()), value);
-}
-
-void EnumsReader::ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>, yardl::DynamicNDArray<test_model::RecordWithFixedVectors>>(group_, "recWithFixedVectorsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithFixedVectors, test_model::RecordWithFixedVectors>(test_model::hdf5::GetRecordWithFixedVectorsHdf5Ddl()), value);
-}
-
-void EnumsReader::ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>, yardl::DynamicNDArray<test_model::RecordWithOptionalFields>>(group_, "recWithOptionalFieldsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithOptionalFields, test_model::RecordWithOptionalFields>(test_model::hdf5::GetRecordWithOptionalFieldsHdf5Ddl()), value);
-}
-
-void EnumsReader::ReadRecWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>, yardl::DynamicNDArray<test_model::RecordWithVlens>>(group_, "recWithVlensArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithVlens, test_model::RecordWithVlens>(test_model::hdf5::GetRecordWithVlensHdf5Ddl()), value);
-}
-
-void EnumsReader::ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) {
-  yardl::hdf5::ReadScalarDataset<yardl::hdf5::InnerDynamicNdArray<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>, yardl::DynamicNDArray<test_model::RecordWithStrings>>(group_, "recWithStringsArray", yardl::hdf5::DynamicNDArrayDdl<test_model::hdf5::_Inner_RecordWithStrings, test_model::RecordWithStrings>(test_model::hdf5::GetRecordWithStringsHdf5Ddl()), value);
 }
 
 FlagsWriter::FlagsWriter(std::string path)

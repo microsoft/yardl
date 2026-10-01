@@ -3433,6 +3433,9 @@ void DynamicNDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] b
   case 1: expected_method = "WriteSimpleRecordArray()"; break;
   case 2: expected_method = "WriteRecordWithVlensArray()"; break;
   case 3: expected_method = "WriteRecordWithDynamicNDArrays()"; break;
+  case 4: expected_method = "WriteRecWithFixedVectorsArray()"; break;
+  case 5: expected_method = "WriteRecWithOptionalFieldsArray()"; break;
+  case 6: expected_method = "WriteRecWithStringsArray()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
@@ -3440,7 +3443,10 @@ void DynamicNDArraysWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] b
   case 1: attempted_method = "WriteSimpleRecordArray()"; break;
   case 2: attempted_method = "WriteRecordWithVlensArray()"; break;
   case 3: attempted_method = "WriteRecordWithDynamicNDArrays()"; break;
-  case 4: attempted_method = "Close()"; break;
+  case 4: attempted_method = "WriteRecWithFixedVectorsArray()"; break;
+  case 5: attempted_method = "WriteRecWithOptionalFieldsArray()"; break;
+  case 6: attempted_method = "WriteRecWithStringsArray()"; break;
+  case 7: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -3452,7 +3458,10 @@ void DynamicNDArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 1: return "ReadSimpleRecordArray()";
     case 2: return "ReadRecordWithVlensArray()";
     case 3: return "ReadRecordWithDynamicNDArrays()";
-    case 4: return "Close()";
+    case 4: return "ReadRecWithFixedVectorsArray()";
+    case 5: return "ReadRecWithOptionalFieldsArray()";
+    case 6: return "ReadRecWithStringsArray()";
+    case 7: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -3461,7 +3470,7 @@ void DynamicNDArraysReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string DynamicNDArraysWriterBase::schema_ = R"({"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
+std::string DynamicNDArraysWriterBase::schema_ = R"({"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"},{"name":"recWithFixedVectorsArray","type":{"array":{"items":"TestModel.RecordWithFixedVectors"}}},{"name":"recWithOptionalFieldsArray","type":{"array":{"items":"TestModel.RecordWithOptionalFields"}}},{"name":"recWithStringsArray","type":{"array":{"items":"TestModel.RecordWithStrings"}}}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]})";
 
 std::vector<std::string> DynamicNDArraysWriterBase::previous_schemas_ = {
 };
@@ -3509,9 +3518,36 @@ void DynamicNDArraysWriterBase::WriteRecordWithDynamicNDArrays(test_model::Recor
   state_ = 4;
 }
 
-void DynamicNDArraysWriterBase::Close() {
+void DynamicNDArraysWriterBase::WriteRecWithFixedVectorsArray(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) {
   if (unlikely(state_ != 4)) {
     DynamicNDArraysWriterBaseInvalidState(4, false, state_);
+  }
+
+  WriteRecWithFixedVectorsArrayImpl(value);
+  state_ = 5;
+}
+
+void DynamicNDArraysWriterBase::WriteRecWithOptionalFieldsArray(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) {
+  if (unlikely(state_ != 5)) {
+    DynamicNDArraysWriterBaseInvalidState(5, false, state_);
+  }
+
+  WriteRecWithOptionalFieldsArrayImpl(value);
+  state_ = 6;
+}
+
+void DynamicNDArraysWriterBase::WriteRecWithStringsArray(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) {
+  if (unlikely(state_ != 6)) {
+    DynamicNDArraysWriterBaseInvalidState(6, false, state_);
+  }
+
+  WriteRecWithStringsArrayImpl(value);
+  state_ = 7;
+}
+
+void DynamicNDArraysWriterBase::Close() {
+  if (unlikely(state_ != 7)) {
+    DynamicNDArraysWriterBaseInvalidState(7, false, state_);
   }
 
   CloseImpl();
@@ -3563,9 +3599,36 @@ void DynamicNDArraysReaderBase::ReadRecordWithDynamicNDArrays(test_model::Record
   state_ = 8;
 }
 
-void DynamicNDArraysReaderBase::Close() {
-  if (!skip_completed_check_ && unlikely(state_ != 8)) {
+void DynamicNDArraysReaderBase::ReadRecWithFixedVectorsArray(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) {
+  if (unlikely(state_ != 8)) {
     DynamicNDArraysReaderBaseInvalidState(8, state_);
+  }
+
+  ReadRecWithFixedVectorsArrayImpl(value);
+  state_ = 10;
+}
+
+void DynamicNDArraysReaderBase::ReadRecWithOptionalFieldsArray(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) {
+  if (unlikely(state_ != 10)) {
+    DynamicNDArraysReaderBaseInvalidState(10, state_);
+  }
+
+  ReadRecWithOptionalFieldsArrayImpl(value);
+  state_ = 12;
+}
+
+void DynamicNDArraysReaderBase::ReadRecWithStringsArray(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) {
+  if (unlikely(state_ != 12)) {
+    DynamicNDArraysReaderBaseInvalidState(12, state_);
+  }
+
+  ReadRecWithStringsArrayImpl(value);
+  state_ = 14;
+}
+
+void DynamicNDArraysReaderBase::Close() {
+  if (!skip_completed_check_ && unlikely(state_ != 14)) {
+    DynamicNDArraysReaderBaseInvalidState(14, state_);
   }
 
   CloseImpl();
@@ -3590,6 +3653,21 @@ void DynamicNDArraysReaderBase::CopyTo(DynamicNDArraysWriterBase& writer) {
     test_model::RecordWithDynamicNDArrays value;
     ReadRecordWithDynamicNDArrays(value);
     writer.WriteRecordWithDynamicNDArrays(value);
+  }
+  {
+    yardl::DynamicNDArray<test_model::RecordWithFixedVectors> value;
+    ReadRecWithFixedVectorsArray(value);
+    writer.WriteRecWithFixedVectorsArray(value);
+  }
+  {
+    yardl::DynamicNDArray<test_model::RecordWithOptionalFields> value;
+    ReadRecWithOptionalFieldsArray(value);
+    writer.WriteRecWithOptionalFieldsArray(value);
+  }
+  {
+    yardl::DynamicNDArray<test_model::RecordWithStrings> value;
+    ReadRecWithStringsArray(value);
+    writer.WriteRecWithStringsArray(value);
   }
 }
 
@@ -4781,10 +4859,6 @@ void EnumsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, u
   case 2: expected_method = "WriteSize()"; break;
   case 3: expected_method = "WriteRec()"; break;
   case 4: expected_method = "WriteRecArray()"; break;
-  case 5: expected_method = "WriteRecWithFixedVectorsArray()"; break;
-  case 6: expected_method = "WriteRecWithOptionalFieldsArray()"; break;
-  case 7: expected_method = "WriteRecWithVlensArray()"; break;
-  case 8: expected_method = "WriteRecWithStringsArray()"; break;
   }
   std::string attempted_method;
   switch (attempted) {
@@ -4793,11 +4867,7 @@ void EnumsWriterBaseInvalidState(uint8_t attempted, [[maybe_unused]] bool end, u
   case 2: attempted_method = "WriteSize()"; break;
   case 3: attempted_method = "WriteRec()"; break;
   case 4: attempted_method = "WriteRecArray()"; break;
-  case 5: attempted_method = "WriteRecWithFixedVectorsArray()"; break;
-  case 6: attempted_method = "WriteRecWithOptionalFieldsArray()"; break;
-  case 7: attempted_method = "WriteRecWithVlensArray()"; break;
-  case 8: attempted_method = "WriteRecWithStringsArray()"; break;
-  case 9: attempted_method = "Close()"; break;
+  case 5: attempted_method = "Close()"; break;
   }
   throw std::runtime_error("Expected call to " + expected_method + " but received call to " + attempted_method + " instead.");
 }
@@ -4810,11 +4880,7 @@ void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
     case 2: return "ReadSize()";
     case 3: return "ReadRec()";
     case 4: return "ReadRecArray()";
-    case 5: return "ReadRecWithFixedVectorsArray()";
-    case 6: return "ReadRecWithOptionalFieldsArray()";
-    case 7: return "ReadRecWithVlensArray()";
-    case 8: return "ReadRecWithStringsArray()";
-    case 9: return "Close()";
+    case 5: return "Close()";
     default: return "<unknown>";
     }
   };
@@ -4823,7 +4889,7 @@ void EnumsReaderBaseInvalidState(uint8_t attempted, uint8_t current) {
 
 } // namespace 
 
-std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"},{"name":"recArray","type":{"array":{"items":"TestModel.RecordWithEnums"}}},{"name":"recWithFixedVectorsArray","type":{"array":{"items":"TestModel.RecordWithFixedVectors"}}},{"name":"recWithOptionalFieldsArray","type":{"array":{"items":"TestModel.RecordWithOptionalFields"}}},{"name":"recWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recWithStringsArray","type":{"array":{"items":"TestModel.RecordWithStrings"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
+std::string EnumsWriterBase::schema_ = R"({"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"},{"name":"recArray","type":{"array":{"items":"TestModel.RecordWithEnums"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]})";
 
 std::vector<std::string> EnumsWriterBase::previous_schemas_ = {
 };
@@ -4880,45 +4946,9 @@ void EnumsWriterBase::WriteRecArray(yardl::DynamicNDArray<test_model::RecordWith
   state_ = 5;
 }
 
-void EnumsWriterBase::WriteRecWithFixedVectorsArray(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) {
+void EnumsWriterBase::Close() {
   if (unlikely(state_ != 5)) {
     EnumsWriterBaseInvalidState(5, false, state_);
-  }
-
-  WriteRecWithFixedVectorsArrayImpl(value);
-  state_ = 6;
-}
-
-void EnumsWriterBase::WriteRecWithOptionalFieldsArray(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) {
-  if (unlikely(state_ != 6)) {
-    EnumsWriterBaseInvalidState(6, false, state_);
-  }
-
-  WriteRecWithOptionalFieldsArrayImpl(value);
-  state_ = 7;
-}
-
-void EnumsWriterBase::WriteRecWithVlensArray(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) {
-  if (unlikely(state_ != 7)) {
-    EnumsWriterBaseInvalidState(7, false, state_);
-  }
-
-  WriteRecWithVlensArrayImpl(value);
-  state_ = 8;
-}
-
-void EnumsWriterBase::WriteRecWithStringsArray(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) {
-  if (unlikely(state_ != 8)) {
-    EnumsWriterBaseInvalidState(8, false, state_);
-  }
-
-  WriteRecWithStringsArrayImpl(value);
-  state_ = 9;
-}
-
-void EnumsWriterBase::Close() {
-  if (unlikely(state_ != 9)) {
-    EnumsWriterBaseInvalidState(9, false, state_);
   }
 
   CloseImpl();
@@ -4979,45 +5009,9 @@ void EnumsReaderBase::ReadRecArray(yardl::DynamicNDArray<test_model::RecordWithE
   state_ = 10;
 }
 
-void EnumsReaderBase::ReadRecWithFixedVectorsArray(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) {
-  if (unlikely(state_ != 10)) {
-    EnumsReaderBaseInvalidState(10, state_);
-  }
-
-  ReadRecWithFixedVectorsArrayImpl(value);
-  state_ = 12;
-}
-
-void EnumsReaderBase::ReadRecWithOptionalFieldsArray(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) {
-  if (unlikely(state_ != 12)) {
-    EnumsReaderBaseInvalidState(12, state_);
-  }
-
-  ReadRecWithOptionalFieldsArrayImpl(value);
-  state_ = 14;
-}
-
-void EnumsReaderBase::ReadRecWithVlensArray(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) {
-  if (unlikely(state_ != 14)) {
-    EnumsReaderBaseInvalidState(14, state_);
-  }
-
-  ReadRecWithVlensArrayImpl(value);
-  state_ = 16;
-}
-
-void EnumsReaderBase::ReadRecWithStringsArray(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) {
-  if (unlikely(state_ != 16)) {
-    EnumsReaderBaseInvalidState(16, state_);
-  }
-
-  ReadRecWithStringsArrayImpl(value);
-  state_ = 18;
-}
-
 void EnumsReaderBase::Close() {
-  if (!skip_completed_check_ && unlikely(state_ != 18)) {
-    EnumsReaderBaseInvalidState(18, state_);
+  if (!skip_completed_check_ && unlikely(state_ != 10)) {
+    EnumsReaderBaseInvalidState(10, state_);
   }
 
   CloseImpl();
@@ -5047,26 +5041,6 @@ void EnumsReaderBase::CopyTo(EnumsWriterBase& writer) {
     yardl::DynamicNDArray<test_model::RecordWithEnums> value;
     ReadRecArray(value);
     writer.WriteRecArray(value);
-  }
-  {
-    yardl::DynamicNDArray<test_model::RecordWithFixedVectors> value;
-    ReadRecWithFixedVectorsArray(value);
-    writer.WriteRecWithFixedVectorsArray(value);
-  }
-  {
-    yardl::DynamicNDArray<test_model::RecordWithOptionalFields> value;
-    ReadRecWithOptionalFieldsArray(value);
-    writer.WriteRecWithOptionalFieldsArray(value);
-  }
-  {
-    yardl::DynamicNDArray<test_model::RecordWithVlens> value;
-    ReadRecWithVlensArray(value);
-    writer.WriteRecWithVlensArray(value);
-  }
-  {
-    yardl::DynamicNDArray<test_model::RecordWithStrings> value;
-    ReadRecWithStringsArray(value);
-    writer.WriteRecWithStringsArray(value);
   }
 }
 

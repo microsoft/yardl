@@ -7,6 +7,9 @@ classdef DynamicNDArraysWriter < yardl.binary.BinaryProtocolWriter & test_model.
     simple_record_array_serializer
     record_with_vlens_array_serializer
     record_with_dynamic_nd_arrays_serializer
+    rec_with_fixed_vectors_array_serializer
+    rec_with_optional_fields_array_serializer
+    rec_with_strings_array_serializer
   end
 
   methods
@@ -17,6 +20,9 @@ classdef DynamicNDArraysWriter < yardl.binary.BinaryProtocolWriter & test_model.
       self.simple_record_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.SimpleRecordSerializer());
       self.record_with_vlens_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlensSerializer());
       self.record_with_dynamic_nd_arrays_serializer = test_model.binary.RecordWithDynamicNDArraysSerializer();
+      self.rec_with_fixed_vectors_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedVectorsSerializer());
+      self.rec_with_optional_fields_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithOptionalFieldsSerializer());
+      self.rec_with_strings_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithStringsSerializer());
     end
   end
 
@@ -35,6 +41,18 @@ classdef DynamicNDArraysWriter < yardl.binary.BinaryProtocolWriter & test_model.
 
     function write_record_with_dynamic_nd_arrays_(self, value)
       self.record_with_dynamic_nd_arrays_serializer.write(self.stream_, value);
+    end
+
+    function write_rec_with_fixed_vectors_array_(self, value)
+      self.rec_with_fixed_vectors_array_serializer.write(self.stream_, value);
+    end
+
+    function write_rec_with_optional_fields_array_(self, value)
+      self.rec_with_optional_fields_array_serializer.write(self.stream_, value);
+    end
+
+    function write_rec_with_strings_array_(self, value)
+      self.rec_with_strings_array_serializer.write(self.stream_, value);
     end
   end
 end

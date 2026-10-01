@@ -680,6 +680,15 @@ class BinaryDynamicNDArraysWriter(_binary.BinaryProtocolWriter, DynamicNDArraysW
     def _write_record_with_dynamic_nd_arrays(self, value: RecordWithDynamicNDArrays) -> None:
         RecordWithDynamicNDArraysSerializer().write(self._stream, value)
 
+    def _write_rec_with_fixed_vectors_array(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(RecordWithFixedVectorsSerializer()).write(self._stream, value)
+
+    def _write_rec_with_optional_fields_array(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(RecordWithOptionalFieldsSerializer()).write(self._stream, value)
+
+    def _write_rec_with_strings_array(self, value: npt.NDArray[np.void]) -> None:
+        _binary.DynamicNDArraySerializer(RecordWithStringsSerializer()).write(self._stream, value)
+
 
 class BinaryDynamicNDArraysReader(_binary.BinaryProtocolReader, DynamicNDArraysReaderBase):
     """Binary writer for the DynamicNDArrays protocol."""
@@ -700,6 +709,15 @@ class BinaryDynamicNDArraysReader(_binary.BinaryProtocolReader, DynamicNDArraysR
 
     def _read_record_with_dynamic_nd_arrays(self) -> RecordWithDynamicNDArrays:
         return RecordWithDynamicNDArraysSerializer().read(self._stream)
+
+    def _read_rec_with_fixed_vectors_array(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(RecordWithFixedVectorsSerializer()).read(self._stream)
+
+    def _read_rec_with_optional_fields_array(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(RecordWithOptionalFieldsSerializer()).read(self._stream)
+
+    def _read_rec_with_strings_array(self) -> npt.NDArray[np.void]:
+        return _binary.DynamicNDArraySerializer(RecordWithStringsSerializer()).read(self._stream)
 
 class BinaryMultiDArraysWriter(_binary.BinaryProtocolWriter, MultiDArraysWriterBase):
     """Binary writer for the MultiDArrays protocol."""
@@ -911,18 +929,6 @@ class BinaryEnumsWriter(_binary.BinaryProtocolWriter, EnumsWriterBase):
     def _write_rec_array(self, value: npt.NDArray[np.void]) -> None:
         _binary.DynamicNDArraySerializer(RecordWithEnumsSerializer()).write(self._stream, value)
 
-    def _write_rec_with_fixed_vectors_array(self, value: npt.NDArray[np.void]) -> None:
-        _binary.DynamicNDArraySerializer(RecordWithFixedVectorsSerializer()).write(self._stream, value)
-
-    def _write_rec_with_optional_fields_array(self, value: npt.NDArray[np.void]) -> None:
-        _binary.DynamicNDArraySerializer(RecordWithOptionalFieldsSerializer()).write(self._stream, value)
-
-    def _write_rec_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
-        _binary.DynamicNDArraySerializer(RecordWithVlensSerializer()).write(self._stream, value)
-
-    def _write_rec_with_strings_array(self, value: npt.NDArray[np.void]) -> None:
-        _binary.DynamicNDArraySerializer(RecordWithStringsSerializer()).write(self._stream, value)
-
 
 class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
     """Binary writer for the Enums protocol."""
@@ -946,18 +952,6 @@ class BinaryEnumsReader(_binary.BinaryProtocolReader, EnumsReaderBase):
 
     def _read_rec_array(self) -> npt.NDArray[np.void]:
         return _binary.DynamicNDArraySerializer(RecordWithEnumsSerializer()).read(self._stream)
-
-    def _read_rec_with_fixed_vectors_array(self) -> npt.NDArray[np.void]:
-        return _binary.DynamicNDArraySerializer(RecordWithFixedVectorsSerializer()).read(self._stream)
-
-    def _read_rec_with_optional_fields_array(self) -> npt.NDArray[np.void]:
-        return _binary.DynamicNDArraySerializer(RecordWithOptionalFieldsSerializer()).read(self._stream)
-
-    def _read_rec_with_vlens_array(self) -> npt.NDArray[np.void]:
-        return _binary.DynamicNDArraySerializer(RecordWithVlensSerializer()).read(self._stream)
-
-    def _read_rec_with_strings_array(self) -> npt.NDArray[np.void]:
-        return _binary.DynamicNDArraySerializer(RecordWithStringsSerializer()).read(self._stream)
 
 class BinaryFlagsWriter(_binary.BinaryProtocolWriter, FlagsWriterBase):
     """Binary writer for the Flags protocol."""

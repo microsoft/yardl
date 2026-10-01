@@ -7,6 +7,9 @@ classdef DynamicNDArraysReader < yardl.binary.BinaryProtocolReader & test_model.
     simple_record_array_serializer
     record_with_vlens_array_serializer
     record_with_dynamic_nd_arrays_serializer
+    rec_with_fixed_vectors_array_serializer
+    rec_with_optional_fields_array_serializer
+    rec_with_strings_array_serializer
   end
 
   methods
@@ -21,6 +24,9 @@ classdef DynamicNDArraysReader < yardl.binary.BinaryProtocolReader & test_model.
       self.simple_record_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.SimpleRecordSerializer());
       self.record_with_vlens_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithVlensSerializer());
       self.record_with_dynamic_nd_arrays_serializer = test_model.binary.RecordWithDynamicNDArraysSerializer();
+      self.rec_with_fixed_vectors_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithFixedVectorsSerializer());
+      self.rec_with_optional_fields_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithOptionalFieldsSerializer());
+      self.rec_with_strings_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithStringsSerializer());
     end
   end
 
@@ -39,6 +45,18 @@ classdef DynamicNDArraysReader < yardl.binary.BinaryProtocolReader & test_model.
 
     function value = read_record_with_dynamic_nd_arrays_(self)
       value = self.record_with_dynamic_nd_arrays_serializer.read(self.stream_);
+    end
+
+    function value = read_rec_with_fixed_vectors_array_(self)
+      value = self.rec_with_fixed_vectors_array_serializer.read(self.stream_);
+    end
+
+    function value = read_rec_with_optional_fields_array_(self)
+      value = self.rec_with_optional_fields_array_serializer.read(self.stream_);
+    end
+
+    function value = read_rec_with_strings_array_(self)
+      value = self.rec_with_strings_array_serializer.read(self.stream_);
     end
   end
 end

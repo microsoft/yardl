@@ -3573,11 +3573,11 @@ class DynamicNDArraysWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
+    schema = r"""{"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"},{"name":"recWithFixedVectorsArray","type":{"array":{"items":"TestModel.RecordWithFixedVectors"}}},{"name":"recWithOptionalFieldsArray","type":{"array":{"items":"TestModel.RecordWithOptionalFields"}}},{"name":"recWithStringsArray","type":{"array":{"items":"TestModel.RecordWithStrings"}}}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}"""
 
     def close(self) -> None:
         self._close()
-        if self._state != 8:
+        if self._state != 14:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -3627,6 +3627,33 @@ class DynamicNDArraysWriterBase(abc.ABC):
         self._write_record_with_dynamic_nd_arrays(value)
         self._state = 8
 
+    def write_rec_with_fixed_vectors_array(self, value: npt.NDArray[np.void]) -> None:
+        """Ordinal 4"""
+
+        if self._state != 8:
+            self._raise_unexpected_state(8)
+
+        self._write_rec_with_fixed_vectors_array(value)
+        self._state = 10
+
+    def write_rec_with_optional_fields_array(self, value: npt.NDArray[np.void]) -> None:
+        """Ordinal 5"""
+
+        if self._state != 10:
+            self._raise_unexpected_state(10)
+
+        self._write_rec_with_optional_fields_array(value)
+        self._state = 12
+
+    def write_rec_with_strings_array(self, value: npt.NDArray[np.void]) -> None:
+        """Ordinal 6"""
+
+        if self._state != 12:
+            self._raise_unexpected_state(12)
+
+        self._write_rec_with_strings_array(value)
+        self._state = 14
+
     @abc.abstractmethod
     def _write_ints(self, value: npt.NDArray[np.int32]) -> None:
         raise NotImplementedError()
@@ -3641,6 +3668,18 @@ class DynamicNDArraysWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def _write_record_with_dynamic_nd_arrays(self, value: RecordWithDynamicNDArrays) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_rec_with_fixed_vectors_array(self, value: npt.NDArray[np.void]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_rec_with_optional_fields_array(self, value: npt.NDArray[np.void]) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _write_rec_with_strings_array(self, value: npt.NDArray[np.void]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -3665,6 +3704,12 @@ class DynamicNDArraysWriterBase(abc.ABC):
             return 'write_record_with_vlens_array'
         if state == 6:
             return 'write_record_with_dynamic_nd_arrays'
+        if state == 8:
+            return 'write_rec_with_fixed_vectors_array'
+        if state == 10:
+            return 'write_rec_with_optional_fields_array'
+        if state == 12:
+            return 'write_rec_with_strings_array'
         return "<unknown>"
 
 class DynamicNDArraysReaderBase(abc.ABC):
@@ -3677,7 +3722,7 @@ class DynamicNDArraysReaderBase(abc.ABC):
 
     def close(self) -> None:
         self._close()
-        if not self._skip_completed_check and self._state != 8:
+        if not self._skip_completed_check and self._state != 14:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -3742,11 +3787,44 @@ class DynamicNDArraysReaderBase(abc.ABC):
         self._state = 8
         return value
 
+    def read_rec_with_fixed_vectors_array(self) -> npt.NDArray[np.void]:
+        """Ordinal 4"""
+
+        if self._state != 8:
+            self._raise_unexpected_state(8)
+
+        value = self._read_rec_with_fixed_vectors_array()
+        self._state = 10
+        return value
+
+    def read_rec_with_optional_fields_array(self) -> npt.NDArray[np.void]:
+        """Ordinal 5"""
+
+        if self._state != 10:
+            self._raise_unexpected_state(10)
+
+        value = self._read_rec_with_optional_fields_array()
+        self._state = 12
+        return value
+
+    def read_rec_with_strings_array(self) -> npt.NDArray[np.void]:
+        """Ordinal 6"""
+
+        if self._state != 12:
+            self._raise_unexpected_state(12)
+
+        value = self._read_rec_with_strings_array()
+        self._state = 14
+        return value
+
     def copy_to(self, writer: DynamicNDArraysWriterBase) -> None:
         writer.write_ints(self.read_ints())
         writer.write_simple_record_array(self.read_simple_record_array())
         writer.write_record_with_vlens_array(self.read_record_with_vlens_array())
         writer.write_record_with_dynamic_nd_arrays(self.read_record_with_dynamic_nd_arrays())
+        writer.write_rec_with_fixed_vectors_array(self.read_rec_with_fixed_vectors_array())
+        writer.write_rec_with_optional_fields_array(self.read_rec_with_optional_fields_array())
+        writer.write_rec_with_strings_array(self.read_rec_with_strings_array())
 
     @abc.abstractmethod
     def _read_ints(self) -> npt.NDArray[np.int32]:
@@ -3762,6 +3840,18 @@ class DynamicNDArraysReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_record_with_dynamic_nd_arrays(self) -> RecordWithDynamicNDArrays:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_rec_with_fixed_vectors_array(self) -> npt.NDArray[np.void]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_rec_with_optional_fields_array(self) -> npt.NDArray[np.void]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def _read_rec_with_strings_array(self) -> npt.NDArray[np.void]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -3787,6 +3877,12 @@ class DynamicNDArraysReaderBase(abc.ABC):
             return 'read_record_with_vlens_array'
         if state == 6:
             return 'read_record_with_dynamic_nd_arrays'
+        if state == 8:
+            return 'read_rec_with_fixed_vectors_array'
+        if state == 10:
+            return 'read_rec_with_optional_fields_array'
+        if state == 12:
+            return 'read_rec_with_strings_array'
         return "<unknown>"
 
 class MultiDArraysWriterBase(abc.ABC):
@@ -4836,11 +4932,11 @@ class EnumsWriterBase(abc.ABC):
     def __init__(self) -> None:
         self._state = 0
 
-    schema = r"""{"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"},{"name":"recArray","type":{"array":{"items":"TestModel.RecordWithEnums"}}},{"name":"recWithFixedVectorsArray","type":{"array":{"items":"TestModel.RecordWithFixedVectors"}}},{"name":"recWithOptionalFieldsArray","type":{"array":{"items":"TestModel.RecordWithOptionalFields"}}},{"name":"recWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recWithStringsArray","type":{"array":{"items":"TestModel.RecordWithStrings"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]}"""
+    schema = r"""{"protocol":{"name":"Enums","sequence":[{"name":"single","type":"TestModel.Fruits"},{"name":"vec","type":{"vector":{"items":"TestModel.Fruits"}}},{"name":"size","type":"TestModel.SizeBasedEnum"},{"name":"rec","type":"TestModel.RecordWithEnums"},{"name":"recArray","type":{"array":{"items":"TestModel.RecordWithEnums"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"Fruits","values":[{"symbol":"apple","value":1},{"symbol":"banana","value":2},{"symbol":"pear","value":3}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"Fruits","type":"BasicTypes.Fruits"},{"name":"RecordWithEnums","fields":[{"name":"enum","type":"TestModel.Fruits"},{"name":"flags","type":"TestModel.DaysOfWeek"},{"name":"flags2","type":"TestModel.TextFormat"},{"name":"rec","type":"TestModel.RecordWithNoDefaultEnum"}]},{"name":"RecordWithNoDefaultEnum","fields":[{"name":"enum","type":"TestModel.Fruits"}]},{"name":"SizeBasedEnum","base":"size","values":[{"symbol":"a","value":0},{"symbol":"b","value":1},{"symbol":"c","value":2}]},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]}"""
 
     def close(self) -> None:
         self._close()
-        if self._state != 18:
+        if self._state != 10:
             expected_method = self._state_to_method_name((self._state + 1) & ~1)
             raise ProtocolError(f"Protocol writer closed before all steps were called. Expected to call to '{expected_method}'.")
 
@@ -4899,42 +4995,6 @@ class EnumsWriterBase(abc.ABC):
         self._write_rec_array(value)
         self._state = 10
 
-    def write_rec_with_fixed_vectors_array(self, value: npt.NDArray[np.void]) -> None:
-        """Ordinal 5"""
-
-        if self._state != 10:
-            self._raise_unexpected_state(10)
-
-        self._write_rec_with_fixed_vectors_array(value)
-        self._state = 12
-
-    def write_rec_with_optional_fields_array(self, value: npt.NDArray[np.void]) -> None:
-        """Ordinal 6"""
-
-        if self._state != 12:
-            self._raise_unexpected_state(12)
-
-        self._write_rec_with_optional_fields_array(value)
-        self._state = 14
-
-    def write_rec_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
-        """Ordinal 7"""
-
-        if self._state != 14:
-            self._raise_unexpected_state(14)
-
-        self._write_rec_with_vlens_array(value)
-        self._state = 16
-
-    def write_rec_with_strings_array(self, value: npt.NDArray[np.void]) -> None:
-        """Ordinal 8"""
-
-        if self._state != 16:
-            self._raise_unexpected_state(16)
-
-        self._write_rec_with_strings_array(value)
-        self._state = 18
-
     @abc.abstractmethod
     def _write_single(self, value: Fruits) -> None:
         raise NotImplementedError()
@@ -4953,22 +5013,6 @@ class EnumsWriterBase(abc.ABC):
 
     @abc.abstractmethod
     def _write_rec_array(self, value: npt.NDArray[np.void]) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_rec_with_fixed_vectors_array(self, value: npt.NDArray[np.void]) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_rec_with_optional_fields_array(self, value: npt.NDArray[np.void]) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_rec_with_vlens_array(self, value: npt.NDArray[np.void]) -> None:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _write_rec_with_strings_array(self, value: npt.NDArray[np.void]) -> None:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -4995,14 +5039,6 @@ class EnumsWriterBase(abc.ABC):
             return 'write_rec'
         if state == 8:
             return 'write_rec_array'
-        if state == 10:
-            return 'write_rec_with_fixed_vectors_array'
-        if state == 12:
-            return 'write_rec_with_optional_fields_array'
-        if state == 14:
-            return 'write_rec_with_vlens_array'
-        if state == 16:
-            return 'write_rec_with_strings_array'
         return "<unknown>"
 
 class EnumsReaderBase(abc.ABC):
@@ -5015,7 +5051,7 @@ class EnumsReaderBase(abc.ABC):
 
     def close(self) -> None:
         self._close()
-        if not self._skip_completed_check and self._state != 18:
+        if not self._skip_completed_check and self._state != 10:
             if self._state % 2 == 1:
                 previous_method = self._state_to_method_name(self._state - 1)
                 raise ProtocolError(f"Protocol reader closed before all data was consumed. The iterable returned by '{previous_method}' was not fully consumed.")
@@ -5090,56 +5126,12 @@ class EnumsReaderBase(abc.ABC):
         self._state = 10
         return value
 
-    def read_rec_with_fixed_vectors_array(self) -> npt.NDArray[np.void]:
-        """Ordinal 5"""
-
-        if self._state != 10:
-            self._raise_unexpected_state(10)
-
-        value = self._read_rec_with_fixed_vectors_array()
-        self._state = 12
-        return value
-
-    def read_rec_with_optional_fields_array(self) -> npt.NDArray[np.void]:
-        """Ordinal 6"""
-
-        if self._state != 12:
-            self._raise_unexpected_state(12)
-
-        value = self._read_rec_with_optional_fields_array()
-        self._state = 14
-        return value
-
-    def read_rec_with_vlens_array(self) -> npt.NDArray[np.void]:
-        """Ordinal 7"""
-
-        if self._state != 14:
-            self._raise_unexpected_state(14)
-
-        value = self._read_rec_with_vlens_array()
-        self._state = 16
-        return value
-
-    def read_rec_with_strings_array(self) -> npt.NDArray[np.void]:
-        """Ordinal 8"""
-
-        if self._state != 16:
-            self._raise_unexpected_state(16)
-
-        value = self._read_rec_with_strings_array()
-        self._state = 18
-        return value
-
     def copy_to(self, writer: EnumsWriterBase) -> None:
         writer.write_single(self.read_single())
         writer.write_vec(self.read_vec())
         writer.write_size(self.read_size())
         writer.write_rec(self.read_rec())
         writer.write_rec_array(self.read_rec_array())
-        writer.write_rec_with_fixed_vectors_array(self.read_rec_with_fixed_vectors_array())
-        writer.write_rec_with_optional_fields_array(self.read_rec_with_optional_fields_array())
-        writer.write_rec_with_vlens_array(self.read_rec_with_vlens_array())
-        writer.write_rec_with_strings_array(self.read_rec_with_strings_array())
 
     @abc.abstractmethod
     def _read_single(self) -> Fruits:
@@ -5159,22 +5151,6 @@ class EnumsReaderBase(abc.ABC):
 
     @abc.abstractmethod
     def _read_rec_array(self) -> npt.NDArray[np.void]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_rec_with_fixed_vectors_array(self) -> npt.NDArray[np.void]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_rec_with_optional_fields_array(self) -> npt.NDArray[np.void]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_rec_with_vlens_array(self) -> npt.NDArray[np.void]:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _read_rec_with_strings_array(self) -> npt.NDArray[np.void]:
         raise NotImplementedError()
 
     T = typing.TypeVar('T')
@@ -5202,14 +5178,6 @@ class EnumsReaderBase(abc.ABC):
             return 'read_rec'
         if state == 8:
             return 'read_rec_array'
-        if state == 10:
-            return 'read_rec_with_fixed_vectors_array'
-        if state == 12:
-            return 'read_rec_with_optional_fields_array'
-        if state == 14:
-            return 'read_rec_with_vlens_array'
-        if state == 16:
-            return 'read_rec_with_strings_array'
         return "<unknown>"
 
 class FlagsWriterBase(abc.ABC):

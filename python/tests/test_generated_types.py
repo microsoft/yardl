@@ -209,7 +209,8 @@ def test_get_dtype():
     assert tm.get_dtype(tm.basic_types.Int32OrString.String) == np.object_
 
     assert tm.get_dtype(tm.basic_types.TimeOrDatetime) == np.object_
-    assert tm.get_dtype(tm.basic_types.TimeOrDatetime.Time) == np.timedelta64
+    assert tm.get_dtype(tm.Time) == np.dtype("timedelta64[ns]")
+    assert tm.get_dtype(tm.basic_types.TimeOrDatetime.Time) == np.dtype("timedelta64[ns]")
     assert tm.get_dtype(tm.basic_types.TimeOrDatetime.Datetime) == np.datetime64
 
     assert tm.get_dtype(tm.Int32OrSimpleRecord) == np.object_
