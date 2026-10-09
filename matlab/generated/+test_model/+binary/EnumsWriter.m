@@ -7,6 +7,7 @@ classdef EnumsWriter < yardl.binary.BinaryProtocolWriter & test_model.EnumsWrite
     vec_serializer
     size_serializer
     rec_serializer
+    rec_array_serializer
   end
 
   methods
@@ -17,6 +18,7 @@ classdef EnumsWriter < yardl.binary.BinaryProtocolWriter & test_model.EnumsWrite
       self.vec_serializer = yardl.binary.VectorSerializer(yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
       self.size_serializer = yardl.binary.EnumSerializer('test_model.SizeBasedEnum', @test_model.SizeBasedEnum, yardl.binary.SizeSerializer);
       self.rec_serializer = test_model.binary.RecordWithEnumsSerializer();
+      self.rec_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithEnumsSerializer());
     end
   end
 
@@ -35,6 +37,10 @@ classdef EnumsWriter < yardl.binary.BinaryProtocolWriter & test_model.EnumsWrite
 
     function write_rec_(self, value)
       self.rec_serializer.write(self.stream_, value);
+    end
+
+    function write_rec_array_(self, value)
+      self.rec_array_serializer.write(self.stream_, value);
     end
   end
 end

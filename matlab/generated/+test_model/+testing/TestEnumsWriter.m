@@ -50,6 +50,11 @@ classdef TestEnumsWriter < test_model.EnumsWriterBase
       self.mock_writer_.expect_write_rec_(value);
     end
 
+    function write_rec_array_(self, value)
+      self.writer_.write_rec_array(value);
+      self.mock_writer_.expect_write_rec_array_(value);
+    end
+
     function close_(self)
       self.close_called_ = true;
       self.writer_.close();

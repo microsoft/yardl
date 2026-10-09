@@ -598,7 +598,7 @@ date_converter = DateConverter()
 
 class TimeConverter(JsonConverter[Time, np.timedelta64]):
     def __init__(self) -> None:
-        super().__init__(np.timedelta64)
+        super().__init__(np.dtype("timedelta64[ns]"))
 
     def to_json(self, value: Time) -> object:
         if isinstance(value, Time):

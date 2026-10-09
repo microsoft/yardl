@@ -1099,7 +1099,7 @@ func typeDefinitionDTypeExpression(t dsl.TypeDefinition, context dTypeExpression
 			case dsl.Date:
 				return "np.dtype(np.datetime64)"
 			case dsl.Time:
-				return "np.dtype(np.timedelta64)"
+				return "np.dtype('timedelta64[ns]')"
 			case dsl.DateTime:
 				return "np.dtype(np.datetime64)"
 			case dsl.String:

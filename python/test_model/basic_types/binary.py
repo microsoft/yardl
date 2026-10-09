@@ -29,7 +29,7 @@ class RecordWithStringSerializer(_binary.RecordSerializer[RecordWithString]):
         self._write(stream, value.i)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['i'])
+        self._write_numpy(stream, value['i'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithString:
         field_values = self._read(stream)
@@ -47,7 +47,7 @@ class RecordWithUnionsSerializer(_binary.RecordSerializer[RecordWithUnions]):
         self._write(stream, value.null_or_int_or_string, value.date_or_datetime, value.null_or_fruits_or_days_of_week, value.record_or_int)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['null_or_int_or_string'], value['date_or_datetime'], value['null_or_fruits_or_days_of_week'], value['record_or_int'])
+        self._write_numpy(stream, value['null_or_int_or_string'], value['date_or_datetime'], value['null_or_fruits_or_days_of_week'], value['record_or_int'])
 
     def read(self, stream: _binary.CodedInputStream) -> RecordWithUnions:
         field_values = self._read(stream)
@@ -65,7 +65,7 @@ class GenericRecordWithComputedFieldsSerializer(typing.Generic[T0, T0_NP, T1, T1
         self._write(stream, value.f1)
 
     def write_numpy(self, stream: _binary.CodedOutputStream, value: np.void) -> None:
-        self._write(stream, value['f1'])
+        self._write_numpy(stream, value['f1'])
 
     def read(self, stream: _binary.CodedInputStream) -> GenericRecordWithComputedFields[T0, T1]:
         field_values = self._read(stream)

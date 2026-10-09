@@ -4,6 +4,7 @@ from typing import TypeVar
 
 import numpy as np
 import numpy.typing as npt
+from numpy.lib.recfunctions import repack_fields
 import pytest
 
 import test_model as tm
@@ -522,6 +523,59 @@ def test_dynamic_ndarrays(format: Format):
                 ),
             )
         )
+        # NDArray of records whose fields exercise the other field serializers
+        # on the numpy record path: fixed vectors, optionals, and strings.
+        w.write_rec_with_fixed_vectors_array(
+            np.array(
+                [
+                    (
+                        [1, 2, 3, 4, 5],
+                        [(1, 2, 3), (4, 5, 6), (7, 8, 9)],
+                        [
+                            ([tm.SimpleRecord(x=1, y=2, z=3)], -7, 22),
+                            (
+                                [
+                                    tm.SimpleRecord(x=4, y=5, z=6),
+                                    tm.SimpleRecord(x=7, y=8, z=9),
+                                ],
+                                11,
+                                13,
+                            ),
+                        ],
+                    ),
+                    (
+                        [6, 7, 8, 9, 10],
+                        [(10, 11, 12), (13, 14, 15), (16, 17, 18)],
+                        [
+                            ([], 0, 0),
+                            ([tm.SimpleRecord(x=2, y=3, z=4)], 1, 2),
+                        ],
+                    ),
+                ],
+                dtype=tm.get_dtype(tm.RecordWithFixedVectors),
+            )
+        )
+        optional_fields_dtype = repack_fields(
+            tm.get_dtype(tm.RecordWithOptionalFields), align=False, recurse=True
+        )
+        w.write_rec_with_optional_fields_array(
+            np.array(
+                [
+                    ((True, 5), (False, 0), (True, 3_723_000_000_004)),
+                    ((False, 0), (True, 9), (False, 0)),
+                ],
+                dtype=optional_fields_dtype,
+            )
+        )
+        w.write_rec_with_strings_array(
+            np.array(
+                [
+                    ("hello", "world"),
+                    ("", "yardl"),
+                ],
+                dtype=tm.get_dtype(tm.RecordWithStrings),
+            )
+        )
 
 
 def test_maps(format: Format):
@@ -594,6 +648,27 @@ def test_enums(format: Format):
                 rec=tm.RecordWithNoDefaultEnum(enum=tm.Fruits.BANANA),
             )
         )
+        # NDArray of records containing enum fields: exercises the numpy
+        # write/read path where enum fields arrive as bare numpy scalars.
+        rec_array = np.zeros(
+            (2,),
+            dtype=repack_fields(
+                tm.get_dtype(tm.RecordWithEnums), align=False, recurse=True
+            ),
+        )
+        rec_array[0] = (
+            tm.Fruits.PEAR.value,
+            tm.DaysOfWeek.MONDAY.value,
+            tm.TextFormat.BOLD.value,
+            (tm.Fruits.BANANA.value,),
+        )
+        rec_array[1] = (
+            tm.Fruits.APPLE.value,
+            tm.DaysOfWeek(0).value,
+            tm.TextFormat.REGULAR.value,
+            (tm.Fruits.APPLE.value,),
+        )
+        w.write_rec_array(rec_array)
 
 
 def test_flags(format: Format):

@@ -7,6 +7,7 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
     expected_vec
     expected_size
     expected_rec
+    expected_rec_array
   end
 
   methods
@@ -16,6 +17,7 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
       self.expected_vec = yardl.None;
       self.expected_size = yardl.None;
       self.expected_rec = yardl.None;
+      self.expected_rec_array = yardl.None;
     end
 
     function expect_write_single_(self, value)
@@ -34,11 +36,16 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
       self.expected_rec = yardl.Optional(value);
     end
 
+    function expect_write_rec_array_(self, value)
+      self.expected_rec_array = yardl.Optional(value);
+    end
+
     function verify(self)
       self.testCase_.verifyEqual(self.expected_single, yardl.None, "Expected call to write_single_ was not received");
       self.testCase_.verifyEqual(self.expected_vec, yardl.None, "Expected call to write_vec_ was not received");
       self.testCase_.verifyEqual(self.expected_size, yardl.None, "Expected call to write_size_ was not received");
       self.testCase_.verifyEqual(self.expected_rec, yardl.None, "Expected call to write_rec_ was not received");
+      self.testCase_.verifyEqual(self.expected_rec_array, yardl.None, "Expected call to write_rec_array_ was not received");
     end
   end
 
@@ -65,6 +72,12 @@ classdef MockEnumsWriter < matlab.mixin.Copyable & test_model.EnumsWriterBase
       self.testCase_.verifyTrue(self.expected_rec.has_value(), "Unexpected call to write_rec_");
       self.testCase_.verifyEqual(value, self.expected_rec.value, "Unexpected argument value for call to write_rec_");
       self.expected_rec = yardl.None;
+    end
+
+    function write_rec_array_(self, value)
+      self.testCase_.verifyTrue(self.expected_rec_array.has_value(), "Unexpected call to write_rec_array_");
+      self.testCase_.verifyEqual(value, self.expected_rec_array.value, "Unexpected argument value for call to write_rec_array_");
+      self.expected_rec_array = yardl.None;
     end
 
     function close_(self)
