@@ -58,7 +58,7 @@ classdef (Abstract) MultiDArraysWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"MultiDArrays","sequence":[{"name":"images","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"name":"ch"},{"name":"z"},{"name":"y"},{"name":"x"}]}}}}},{"name":"frames","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"name":"ch","length":1},{"name":"z","length":1},{"name":"y","length":64},{"name":"x","length":32}]}}}}}]},"types":null}');
+      res = string('{"protocol":{"name":"MultiDArrays","sequence":[{"name":"images","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"name":"ch"},{"name":"z"},{"name":"y"},{"name":"x"}]}}}}},{"name":"frames","type":{"stream":{"items":{"array":{"items":"float32","dimensions":[{"name":"ch","length":1},{"name":"z","length":1},{"name":"y","length":64},{"name":"x","length":32}]}}}}}]},"types":[]}');
     end
   end
 

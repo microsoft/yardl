@@ -42,7 +42,7 @@ classdef (Abstract) ComplexArraysWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"ComplexArrays","sequence":[{"name":"floats","type":{"array":{"items":"complexfloat32"}}},{"name":"doubles","type":{"array":{"items":"complexfloat64","dimensions":2}}}]},"types":null}');
+      res = string('{"protocol":{"name":"ComplexArrays","sequence":[{"name":"floats","type":{"array":{"items":"complexfloat32"}}},{"name":"doubles","type":{"array":{"items":"complexfloat64","dimensions":2}}}]},"types":[]}');
     end
   end
 
