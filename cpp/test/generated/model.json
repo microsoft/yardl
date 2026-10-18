@@ -4927,6 +4927,30 @@
             {
               "name": "recordWithDynamicNDArrays",
               "type": "TestModel.RecordWithDynamicNDArrays"
+            },
+            {
+              "name": "recWithFixedVectorsArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithFixedVectors"
+                }
+              }
+            },
+            {
+              "name": "recWithOptionalFieldsArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithOptionalFields"
+                }
+              }
+            },
+            {
+              "name": "recWithStringsArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithStrings"
+                }
+              }
             }
           ]
         },
@@ -5229,6 +5253,14 @@
             {
               "name": "rec",
               "type": "TestModel.RecordWithEnums"
+            },
+            {
+              "name": "recArray",
+              "type": {
+                "array": {
+                  "items": "TestModel.RecordWithEnums"
+                }
+              }
             }
           ]
         },

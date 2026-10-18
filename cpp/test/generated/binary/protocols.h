@@ -831,6 +831,9 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, yard
   void WriteSimpleRecordArrayImpl(yardl::DynamicNDArray<test_model::SimpleRecord> const& value) override;
   void WriteRecordWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens> const& value) override;
   void WriteRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays const& value) override;
+  void WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) override;
+  void WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) override;
+  void WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) override;
   void CloseImpl() override;
 
   Version version_;
@@ -852,6 +855,9 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, yard
   void ReadSimpleRecordArrayImpl(yardl::DynamicNDArray<test_model::SimpleRecord>& value) override;
   void ReadRecordWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) override;
   void ReadRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays& value) override;
+  void ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) override;
+  void ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) override;
+  void ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) override;
   void CloseImpl() override;
 
   Version version_;
@@ -1098,6 +1104,7 @@ class EnumsWriter : public test_model::EnumsWriterBase, yardl::binary::BinaryWri
   void WriteVecImpl(std::vector<test_model::Fruits> const& value) override;
   void WriteSizeImpl(test_model::SizeBasedEnum const& value) override;
   void WriteRecImpl(test_model::RecordWithEnums const& value) override;
+  void WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) override;
   void CloseImpl() override;
 
   Version version_;
@@ -1119,6 +1126,7 @@ class EnumsReader : public test_model::EnumsReaderBase, yardl::binary::BinaryRea
   void ReadVecImpl(std::vector<test_model::Fruits>& value) override;
   void ReadSizeImpl(test_model::SizeBasedEnum& value) override;
   void ReadRecImpl(test_model::RecordWithEnums& value) override;
+  void ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) override;
   void CloseImpl() override;
 
   Version version_;

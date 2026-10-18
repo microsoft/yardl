@@ -17,7 +17,7 @@ classdef DynamicNDArraysReaderBase < handle
 
     function close(self)
       self.close_();
-      if ~self.skip_completed_check_ && self.state_ ~= 4
+      if ~self.skip_completed_check_ && self.state_ ~= 7
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol reader closed before all data was consumed. Expected call to '%s'.", expected_method));
       end
@@ -63,11 +63,44 @@ classdef DynamicNDArraysReaderBase < handle
       self.state_ = 4;
     end
 
+    % Ordinal 4
+    function value = read_rec_with_fixed_vectors_array(self)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      value = self.read_rec_with_fixed_vectors_array_();
+      self.state_ = 5;
+    end
+
+    % Ordinal 5
+    function value = read_rec_with_optional_fields_array(self)
+      if self.state_ ~= 5
+        self.raise_unexpected_state_(5);
+      end
+
+      value = self.read_rec_with_optional_fields_array_();
+      self.state_ = 6;
+    end
+
+    % Ordinal 6
+    function value = read_rec_with_strings_array(self)
+      if self.state_ ~= 6
+        self.raise_unexpected_state_(6);
+      end
+
+      value = self.read_rec_with_strings_array_();
+      self.state_ = 7;
+    end
+
     function copy_to(self, writer)
       writer.write_ints(self.read_ints());
       writer.write_simple_record_array(self.read_simple_record_array());
       writer.write_record_with_vlens_array(self.read_record_with_vlens_array());
       writer.write_record_with_dynamic_nd_arrays(self.read_record_with_dynamic_nd_arrays());
+      writer.write_rec_with_fixed_vectors_array(self.read_rec_with_fixed_vectors_array());
+      writer.write_rec_with_optional_fields_array(self.read_rec_with_optional_fields_array());
+      writer.write_rec_with_strings_array(self.read_rec_with_strings_array());
     end
   end
 
@@ -82,6 +115,9 @@ classdef DynamicNDArraysReaderBase < handle
     read_simple_record_array_(self)
     read_record_with_vlens_array_(self)
     read_record_with_dynamic_nd_arrays_(self)
+    read_rec_with_fixed_vectors_array_(self)
+    read_rec_with_optional_fields_array_(self)
+    read_rec_with_strings_array_(self)
 
     close_(self)
   end
@@ -102,6 +138,12 @@ classdef DynamicNDArraysReaderBase < handle
         name = "read_record_with_vlens_array";
       elseif state == 3
         name = "read_record_with_dynamic_nd_arrays";
+      elseif state == 4
+        name = "read_rec_with_fixed_vectors_array";
+      elseif state == 5
+        name = "read_rec_with_optional_fields_array";
+      elseif state == 6
+        name = "read_rec_with_strings_array";
       else
         name = "<unknown>";
       end

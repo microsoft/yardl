@@ -2248,6 +2248,54 @@ class MockDynamicNDArraysWriter : public DynamicNDArraysWriterBase {
     WriteRecordWithDynamicNDArraysImpl_expected_values_.push(value);
   }
 
+  void WriteRecWithFixedVectorsArrayImpl (yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) override {
+    if (WriteRecWithFixedVectorsArrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteRecWithFixedVectorsArrayImpl");
+    }
+    if (WriteRecWithFixedVectorsArrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteRecWithFixedVectorsArrayImpl");
+    }
+    WriteRecWithFixedVectorsArrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<test_model::RecordWithFixedVectors>> WriteRecWithFixedVectorsArrayImpl_expected_values_;
+
+  void ExpectWriteRecWithFixedVectorsArrayImpl (yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) {
+    WriteRecWithFixedVectorsArrayImpl_expected_values_.push(value);
+  }
+
+  void WriteRecWithOptionalFieldsArrayImpl (yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) override {
+    if (WriteRecWithOptionalFieldsArrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteRecWithOptionalFieldsArrayImpl");
+    }
+    if (WriteRecWithOptionalFieldsArrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteRecWithOptionalFieldsArrayImpl");
+    }
+    WriteRecWithOptionalFieldsArrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<test_model::RecordWithOptionalFields>> WriteRecWithOptionalFieldsArrayImpl_expected_values_;
+
+  void ExpectWriteRecWithOptionalFieldsArrayImpl (yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) {
+    WriteRecWithOptionalFieldsArrayImpl_expected_values_.push(value);
+  }
+
+  void WriteRecWithStringsArrayImpl (yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) override {
+    if (WriteRecWithStringsArrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteRecWithStringsArrayImpl");
+    }
+    if (WriteRecWithStringsArrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteRecWithStringsArrayImpl");
+    }
+    WriteRecWithStringsArrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<test_model::RecordWithStrings>> WriteRecWithStringsArrayImpl_expected_values_;
+
+  void ExpectWriteRecWithStringsArrayImpl (yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) {
+    WriteRecWithStringsArrayImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteIntsImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteIntsImpl was not received");
@@ -2260,6 +2308,15 @@ class MockDynamicNDArraysWriter : public DynamicNDArraysWriterBase {
     }
     if (!WriteRecordWithDynamicNDArraysImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteRecordWithDynamicNDArraysImpl was not received");
+    }
+    if (!WriteRecWithFixedVectorsArrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteRecWithFixedVectorsArrayImpl was not received");
+    }
+    if (!WriteRecWithOptionalFieldsArrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteRecWithOptionalFieldsArrayImpl was not received");
+    }
+    if (!WriteRecWithStringsArrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteRecWithStringsArrayImpl was not received");
     }
   }
 };
@@ -2294,6 +2351,21 @@ class TestDynamicNDArraysWriterBase : public DynamicNDArraysWriterBase {
   void WriteRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays const& value) override {
     writer_->WriteRecordWithDynamicNDArrays(value);
     mock_writer_.ExpectWriteRecordWithDynamicNDArraysImpl(value);
+  }
+
+  void WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) override {
+    writer_->WriteRecWithFixedVectorsArray(value);
+    mock_writer_.ExpectWriteRecWithFixedVectorsArrayImpl(value);
+  }
+
+  void WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) override {
+    writer_->WriteRecWithOptionalFieldsArray(value);
+    mock_writer_.ExpectWriteRecWithOptionalFieldsArrayImpl(value);
+  }
+
+  void WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) override {
+    writer_->WriteRecWithStringsArray(value);
+    mock_writer_.ExpectWriteRecWithStringsArrayImpl(value);
   }
 
   void CloseImpl() override {
@@ -3085,6 +3157,22 @@ class MockEnumsWriter : public EnumsWriterBase {
     WriteRecImpl_expected_values_.push(value);
   }
 
+  void WriteRecArrayImpl (yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) override {
+    if (WriteRecArrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Unexpected call to WriteRecArrayImpl");
+    }
+    if (WriteRecArrayImpl_expected_values_.front() != value) {
+      throw std::runtime_error("Unexpected argument value for call to WriteRecArrayImpl");
+    }
+    WriteRecArrayImpl_expected_values_.pop();
+  }
+
+  std::queue<yardl::DynamicNDArray<test_model::RecordWithEnums>> WriteRecArrayImpl_expected_values_;
+
+  void ExpectWriteRecArrayImpl (yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) {
+    WriteRecArrayImpl_expected_values_.push(value);
+  }
+
   void Verify() {
     if (!WriteSingleImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteSingleImpl was not received");
@@ -3097,6 +3185,9 @@ class MockEnumsWriter : public EnumsWriterBase {
     }
     if (!WriteRecImpl_expected_values_.empty()) {
       throw std::runtime_error("Expected call to WriteRecImpl was not received");
+    }
+    if (!WriteRecArrayImpl_expected_values_.empty()) {
+      throw std::runtime_error("Expected call to WriteRecArrayImpl was not received");
     }
   }
 };
@@ -3131,6 +3222,11 @@ class TestEnumsWriterBase : public EnumsWriterBase {
   void WriteRecImpl(test_model::RecordWithEnums const& value) override {
     writer_->WriteRec(value);
     mock_writer_.ExpectWriteRecImpl(value);
+  }
+
+  void WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) override {
+    writer_->WriteRecArray(value);
+    mock_writer_.ExpectWriteRecArrayImpl(value);
   }
 
   void CloseImpl() override {
