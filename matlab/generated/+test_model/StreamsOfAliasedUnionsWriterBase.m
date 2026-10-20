@@ -58,7 +58,7 @@ classdef (Abstract) StreamsOfAliasedUnionsWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"StreamsOfAliasedUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedIntOrSimpleRecord"}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedNullableIntSimpleRecord"}}}]},"types":[{"name":"AliasedIntOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"AliasedNullableIntSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
+      res = string('{"protocol":{"name":"StreamsOfAliasedUnions","sequence":[{"name":"intOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedIntOrSimpleRecord"}}},{"name":"nullableIntOrSimpleRecord","type":{"stream":{"items":"TestModel.AliasedNullableIntSimpleRecord"}}}]},"types":[{"alias":{"name":"AliasedIntOrSimpleRecord","type":[{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}},{"alias":{"name":"AliasedNullableIntSimpleRecord","type":[null,{"tag":"int32","type":"int32"},{"tag":"SimpleRecord","type":"TestModel.SimpleRecord"}]}},{"record":{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}}]}');
     end
   end
 

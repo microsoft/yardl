@@ -10,7 +10,7 @@ import (
 
 type ProtocolSchema struct {
 	Protocol *ProtocolDefinition `json:"protocol"`
-	Types    []TypeDefinition    `json:"types"`
+	Types    TypeDefinitions     `json:"types"`
 }
 
 func GetProtocolSchema(protocol *ProtocolDefinition, symbolTable SymbolTable) *ProtocolSchema {

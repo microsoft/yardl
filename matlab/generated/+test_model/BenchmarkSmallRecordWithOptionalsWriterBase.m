@@ -40,7 +40,7 @@ classdef (Abstract) BenchmarkSmallRecordWithOptionalsWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"BenchmarkSmallRecordWithOptionals","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SimpleEncodingCounters"}}}]},"types":[{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}]}');
+      res = string('{"protocol":{"name":"BenchmarkSmallRecordWithOptionals","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SimpleEncodingCounters"}}}]},"types":[{"record":{"name":"SimpleEncodingCounters","fields":[{"name":"e1","type":[null,"uint32"]},{"name":"e2","type":[null,"uint32"]},{"name":"slice","type":[null,"uint32"]},{"name":"repetition","type":[null,"uint32"]}]}}]}');
     end
   end
 

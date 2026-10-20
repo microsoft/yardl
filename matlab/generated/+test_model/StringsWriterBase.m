@@ -42,7 +42,7 @@ classdef (Abstract) StringsWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"Strings","sequence":[{"name":"singleString","type":"string"},{"name":"recWithString","type":"TestModel.RecordWithStrings"}]},"types":[{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]}]}');
+      res = string('{"protocol":{"name":"Strings","sequence":[{"name":"singleString","type":"string"},{"name":"recWithString","type":"TestModel.RecordWithStrings"}]},"types":[{"record":{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]}}]}');
     end
   end
 

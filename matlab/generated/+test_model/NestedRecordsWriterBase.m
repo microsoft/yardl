@@ -32,7 +32,7 @@ classdef (Abstract) NestedRecordsWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"NestedRecords","sequence":[{"name":"tupleWithRecords","type":"TestModel.TupleWithRecords"}]},"types":[{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]},{"name":"TupleWithRecords","fields":[{"name":"a","type":"TestModel.SimpleRecord"},{"name":"b","type":"TestModel.SimpleRecord"}]}]}');
+      res = string('{"protocol":{"name":"NestedRecords","sequence":[{"name":"tupleWithRecords","type":"TestModel.TupleWithRecords"}]},"types":[{"record":{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}},{"record":{"name":"TupleWithRecords","fields":[{"name":"a","type":"TestModel.SimpleRecord"},{"name":"b","type":"TestModel.SimpleRecord"}]}}]}');
     end
   end
 

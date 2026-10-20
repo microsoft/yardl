@@ -40,7 +40,7 @@ classdef (Abstract) BenchmarkInt256x256WriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"BenchmarkInt256x256","sequence":[{"name":"int256x256","type":{"stream":{"items":{"array":{"items":"int32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":null}');
+      res = string('{"protocol":{"name":"BenchmarkInt256x256","sequence":[{"name":"int256x256","type":{"stream":{"items":{"array":{"items":"int32","dimensions":[{"length":256},{"length":256}]}}}}}]},"types":[]}');
     end
   end
 
