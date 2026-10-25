@@ -7,6 +7,7 @@ classdef EnumsReader < yardl.binary.BinaryProtocolReader & test_model.EnumsReade
     vec_serializer
     size_serializer
     rec_serializer
+    rec_array_serializer
   end
 
   methods
@@ -21,6 +22,7 @@ classdef EnumsReader < yardl.binary.BinaryProtocolReader & test_model.EnumsReade
       self.vec_serializer = yardl.binary.VectorSerializer(yardl.binary.EnumSerializer('basic_types.Fruits', @basic_types.Fruits, yardl.binary.Int32Serializer));
       self.size_serializer = yardl.binary.EnumSerializer('test_model.SizeBasedEnum', @test_model.SizeBasedEnum, yardl.binary.SizeSerializer);
       self.rec_serializer = test_model.binary.RecordWithEnumsSerializer();
+      self.rec_array_serializer = yardl.binary.DynamicNDArraySerializer(test_model.binary.RecordWithEnumsSerializer());
     end
   end
 
@@ -39,6 +41,10 @@ classdef EnumsReader < yardl.binary.BinaryProtocolReader & test_model.EnumsReade
 
     function value = read_rec_(self)
       value = self.rec_serializer.read(self.stream_);
+    end
+
+    function value = read_rec_array_(self)
+      value = self.rec_array_serializer.read(self.stream_);
     end
   end
 end

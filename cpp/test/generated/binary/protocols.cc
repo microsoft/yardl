@@ -3802,6 +3802,18 @@ void DynamicNDArraysWriter::WriteRecordWithDynamicNDArraysImpl(test_model::Recor
   test_model::binary::WriteRecordWithDynamicNDArrays(stream_, value);
 }
 
+void DynamicNDArraysWriter::WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithFixedVectors, test_model::binary::WriteRecordWithFixedVectors>(stream_, value);
+}
+
+void DynamicNDArraysWriter::WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithOptionalFields, test_model::binary::WriteRecordWithOptionalFields>(stream_, value);
+}
+
+void DynamicNDArraysWriter::WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithStrings, test_model::binary::WriteRecordWithStrings>(stream_, value);
+}
+
 void DynamicNDArraysWriter::Flush() {
   stream_.Flush();
 }
@@ -3824,6 +3836,18 @@ void DynamicNDArraysReader::ReadRecordWithVlensArrayImpl(yardl::DynamicNDArray<t
 
 void DynamicNDArraysReader::ReadRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays& value) {
   test_model::binary::ReadRecordWithDynamicNDArrays(stream_, value);
+}
+
+void DynamicNDArraysReader::ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithFixedVectors, test_model::binary::ReadRecordWithFixedVectors>(stream_, value);
+}
+
+void DynamicNDArraysReader::ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithOptionalFields, test_model::binary::ReadRecordWithOptionalFields>(stream_, value);
+}
+
+void DynamicNDArraysReader::ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithStrings, test_model::binary::ReadRecordWithStrings>(stream_, value);
 }
 
 void DynamicNDArraysReader::CloseImpl() {
@@ -4139,6 +4163,10 @@ void EnumsWriter::WriteRecImpl(test_model::RecordWithEnums const& value) {
   test_model::binary::WriteRecordWithEnums(stream_, value);
 }
 
+void EnumsWriter::WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) {
+  yardl::binary::WriteDynamicNDArray<test_model::RecordWithEnums, test_model::binary::WriteRecordWithEnums>(stream_, value);
+}
+
 void EnumsWriter::Flush() {
   stream_.Flush();
 }
@@ -4161,6 +4189,10 @@ void EnumsReader::ReadSizeImpl(test_model::SizeBasedEnum& value) {
 
 void EnumsReader::ReadRecImpl(test_model::RecordWithEnums& value) {
   test_model::binary::ReadRecordWithEnums(stream_, value);
+}
+
+void EnumsReader::ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) {
+  yardl::binary::ReadDynamicNDArray<test_model::RecordWithEnums, test_model::binary::ReadRecordWithEnums>(stream_, value);
 }
 
 void EnumsReader::CloseImpl() {

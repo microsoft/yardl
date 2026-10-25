@@ -161,6 +161,18 @@ def test_get_dtype():
         align=True,
     )
 
+    # Enum fields map to their integer base dtype, so iterating a record
+    # array yields bare numpy scalars for those fields.
+    assert tm.get_dtype(tm.RecordWithEnums) == np.dtype(
+        [
+            ("enum", "<i4"),
+            ("flags", "<i4"),
+            ("flags_2", "<u8"),
+            ("rec", tm.get_dtype(tm.RecordWithNoDefaultEnum)),
+        ],
+        align=True,
+    )
+
     assert tm.get_dtype(tm.IntFixedArray) == np.object_
     assert tm.get_dtype(tm.SimpleRecordFixedArray) == np.object_
     assert tm.get_dtype(tm.RecordWithVlensFixedArray) == np.object_
@@ -197,7 +209,8 @@ def test_get_dtype():
     assert tm.get_dtype(tm.basic_types.Int32OrString.String) == np.object_
 
     assert tm.get_dtype(tm.basic_types.TimeOrDatetime) == np.object_
-    assert tm.get_dtype(tm.basic_types.TimeOrDatetime.Time) == np.timedelta64
+    assert tm.get_dtype(tm.Time) == np.dtype("timedelta64[ns]")
+    assert tm.get_dtype(tm.basic_types.TimeOrDatetime.Time) == np.dtype("timedelta64[ns]")
     assert tm.get_dtype(tm.basic_types.TimeOrDatetime.Datetime) == np.datetime64
 
     assert tm.get_dtype(tm.Int32OrSimpleRecord) == np.object_
