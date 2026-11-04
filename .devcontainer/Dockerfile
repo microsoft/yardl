@@ -1,4 +1,7 @@
-ARG DEVCONTAINER_BASE=mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04
+ARG DEVCONTAINER_BASE=yardl-base
+
+# Expose the default image to Dependabot while retaining build-arg overrides.
+FROM mcr.microsoft.com/devcontainers/base:1.0.9-ubuntu-22.04 AS yardl-base
 
 #########################################################
 # devcontainer stage
