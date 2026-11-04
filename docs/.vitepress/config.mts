@@ -135,17 +135,18 @@ export default defineConfig({
                 // search result is for. So we augment the "titles" field with
                 // either C++ or Python if the document is under one of those paths.
 
+                // VitePress 2 search IDs exclude the configured site base.
                 var documentId: string = document["id"];
-                if (documentId.startsWith("/yardl/cpp")) {
+                if (documentId.startsWith("/cpp/")) {
                   // Include "C++"" in the search preview "path"
                   return ["C++"].concat(fieldValue);
                 }
 
-                if (documentId.startsWith("/yardl/python")) {
+                if (documentId.startsWith("/python/")) {
                   return ["Python"].concat(fieldValue);
                 }
 
-                if (documentId.startsWith("/yardl/matlab")) {
+                if (documentId.startsWith("/matlab/")) {
                   return ["Matlab"].concat(fieldValue);
                 }
               }

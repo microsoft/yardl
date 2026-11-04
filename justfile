@@ -157,4 +157,4 @@ validate-with-no-changes: validate
     watchexec -c -w models/test/ -w python/ -i **/__pycache__/** -w tooling/ --on-busy-update do-nothing -- "just python-test"
 
 @start-docs-website:
-    cd docs && npm install && npm run docs:dev
+    cd docs && npm ci && npm run docs:dev

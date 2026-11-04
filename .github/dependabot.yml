@@ -15,7 +15,9 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: github-actions
-    directory: /
+    directories:
+      - /
+      - /.github/actions/configure-environment
     schedule:
       interval: weekly
     cooldown:
@@ -28,3 +30,23 @@ updates:
         applies-to: security-updates
         patterns:
           - "*"
+  - package-ecosystem: npm
+    directory: /docs
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      npm:
+        patterns:
+          - "*"
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+  - package-ecosystem: docker
+    directory: /.devcontainer
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
