@@ -13,7 +13,7 @@ classdef (Abstract) DynamicNDArraysWriterBase < handle
 
     function close(self)
       self.close_();
-      if self.state_ ~= 4
+      if self.state_ ~= 7
         expected_method = self.state_to_method_name_(self.state_);
         throw(yardl.ProtocolError("Protocol writer closed before all steps were called. Expected call to '%s'.", expected_method));
       end
@@ -58,11 +58,41 @@ classdef (Abstract) DynamicNDArraysWriterBase < handle
       self.write_record_with_dynamic_nd_arrays_(value);
       self.state_ = 4;
     end
+
+    % Ordinal 4
+    function write_rec_with_fixed_vectors_array(self, value)
+      if self.state_ ~= 4
+        self.raise_unexpected_state_(4);
+      end
+
+      self.write_rec_with_fixed_vectors_array_(value);
+      self.state_ = 5;
+    end
+
+    % Ordinal 5
+    function write_rec_with_optional_fields_array(self, value)
+      if self.state_ ~= 5
+        self.raise_unexpected_state_(5);
+      end
+
+      self.write_rec_with_optional_fields_array_(value);
+      self.state_ = 6;
+    end
+
+    % Ordinal 6
+    function write_rec_with_strings_array(self, value)
+      if self.state_ ~= 6
+        self.raise_unexpected_state_(6);
+      end
+
+      self.write_rec_with_strings_array_(value);
+      self.state_ = 7;
+    end
   end
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
+      res = string('{"protocol":{"name":"DynamicNDArrays","sequence":[{"name":"ints","type":{"array":{"items":"int32"}}},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}},{"name":"recordWithDynamicNDArrays","type":"TestModel.RecordWithDynamicNDArrays"},{"name":"recWithFixedVectorsArray","type":{"array":{"items":"TestModel.RecordWithFixedVectors"}}},{"name":"recWithOptionalFieldsArray","type":{"array":{"items":"TestModel.RecordWithOptionalFields"}}},{"name":"recWithStringsArray","type":{"array":{"items":"TestModel.RecordWithStrings"}}}]},"types":[{"name":"IntArray","type":{"array":{"items":"int32"}}},{"name":"RecordWithDynamicNDArrays","fields":[{"name":"ints","type":"TestModel.IntArray"},{"name":"simpleRecordArray","type":{"array":{"items":"TestModel.SimpleRecord"}}},{"name":"recordWithVlensArray","type":{"array":{"items":"TestModel.RecordWithVlens"}}}]},{"name":"RecordWithFixedVectors","fields":[{"name":"fixedIntVector","type":{"vector":{"items":"int32","length":5}}},{"name":"fixedSimpleRecordVector","type":{"vector":{"items":"TestModel.SimpleRecord","length":3}}},{"name":"fixedRecordWithVlensVector","type":{"vector":{"items":"TestModel.RecordWithVlens","length":2}}}]},{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"RecordWithStrings","fields":[{"name":"a","type":"string"},{"name":"b","type":"string"}]},{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
     end
   end
 
@@ -71,6 +101,9 @@ classdef (Abstract) DynamicNDArraysWriterBase < handle
     write_simple_record_array_(self, value)
     write_record_with_vlens_array_(self, value)
     write_record_with_dynamic_nd_arrays_(self, value)
+    write_rec_with_fixed_vectors_array_(self, value)
+    write_rec_with_optional_fields_array_(self, value)
+    write_rec_with_strings_array_(self, value)
 
     end_stream_(self)
     close_(self)
@@ -92,6 +125,12 @@ classdef (Abstract) DynamicNDArraysWriterBase < handle
         name = "write_record_with_vlens_array";
       elseif state == 3
         name = "write_record_with_dynamic_nd_arrays";
+      elseif state == 4
+        name = "write_rec_with_fixed_vectors_array";
+      elseif state == 5
+        name = "write_rec_with_optional_fields_array";
+      elseif state == 6
+        name = "write_rec_with_strings_array";
       else
         name = '<unknown>';
       end

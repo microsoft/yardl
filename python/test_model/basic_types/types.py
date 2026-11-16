@@ -244,7 +244,7 @@ def _mk_get_dtype():
     dtype_map.setdefault(Int32OrString.Int32, np.dtype(np.int32))
     dtype_map.setdefault(Int32OrString.String, np.dtype(np.object_))
     dtype_map.setdefault(TimeOrDatetime, np.dtype(np.object_))
-    dtype_map.setdefault(TimeOrDatetime.Time, np.dtype(np.timedelta64))
+    dtype_map.setdefault(TimeOrDatetime.Time, np.dtype('timedelta64[ns]'))
     dtype_map.setdefault(TimeOrDatetime.Datetime, np.dtype(np.datetime64))
     dtype_map.setdefault(RecordWithStringOrInt32, np.dtype(np.object_))
     dtype_map.setdefault(RecordWithStringOrInt32.RecordWithString, get_dtype(RecordWithString))

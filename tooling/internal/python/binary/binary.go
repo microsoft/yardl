@@ -119,7 +119,7 @@ func writeRecordSerializers(w *formatting.IndentedWriter, ns *dsl.Namespace) {
 					for i, field := range td.Fields {
 						fieldAccesses[i] = fmt.Sprintf(`value['%s']`, common.FieldIdentifierName(field.Name))
 					}
-					fmt.Fprintf(w, "self._write(stream, %s)\n", strings.Join(fieldAccesses, ", "))
+					fmt.Fprintf(w, "self._write_numpy(stream, %s)\n", strings.Join(fieldAccesses, ", "))
 				})
 				w.WriteStringln("")
 

@@ -639,6 +639,12 @@ class DynamicNDArraysWriter : public test_model::DynamicNDArraysWriterBase, publ
 
   void WriteRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays const& value) override;
 
+  void WriteRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors> const& value) override;
+
+  void WriteRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields> const& value) override;
+
+  void WriteRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings> const& value) override;
+
   private:
 };
 
@@ -654,6 +660,12 @@ class DynamicNDArraysReader : public test_model::DynamicNDArraysReaderBase, publ
   void ReadRecordWithVlensArrayImpl(yardl::DynamicNDArray<test_model::RecordWithVlens>& value) override;
 
   void ReadRecordWithDynamicNDArraysImpl(test_model::RecordWithDynamicNDArrays& value) override;
+
+  void ReadRecWithFixedVectorsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithFixedVectors>& value) override;
+
+  void ReadRecWithOptionalFieldsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithOptionalFields>& value) override;
+
+  void ReadRecWithStringsArrayImpl(yardl::DynamicNDArray<test_model::RecordWithStrings>& value) override;
 
   private:
 };
@@ -856,6 +868,8 @@ class EnumsWriter : public test_model::EnumsWriterBase, public yardl::hdf5::Hdf5
 
   void WriteRecImpl(test_model::RecordWithEnums const& value) override;
 
+  void WriteRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums> const& value) override;
+
   private:
 };
 
@@ -871,6 +885,8 @@ class EnumsReader : public test_model::EnumsReaderBase, public yardl::hdf5::Hdf5
   void ReadSizeImpl(test_model::SizeBasedEnum& value) override;
 
   void ReadRecImpl(test_model::RecordWithEnums& value) override;
+
+  void ReadRecArrayImpl(yardl::DynamicNDArray<test_model::RecordWithEnums>& value) override;
 
   private:
 };

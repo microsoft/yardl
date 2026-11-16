@@ -50,6 +50,21 @@ classdef TestDynamicNDArraysWriter < test_model.DynamicNDArraysWriterBase
       self.mock_writer_.expect_write_record_with_dynamic_nd_arrays_(value);
     end
 
+    function write_rec_with_fixed_vectors_array_(self, value)
+      self.writer_.write_rec_with_fixed_vectors_array(value);
+      self.mock_writer_.expect_write_rec_with_fixed_vectors_array_(value);
+    end
+
+    function write_rec_with_optional_fields_array_(self, value)
+      self.writer_.write_rec_with_optional_fields_array(value);
+      self.mock_writer_.expect_write_rec_with_optional_fields_array_(value);
+    end
+
+    function write_rec_with_strings_array_(self, value)
+      self.writer_.write_rec_with_strings_array(value);
+      self.mock_writer_.expect_write_rec_with_strings_array_(value);
+    end
+
     function close_(self)
       self.close_called_ = true;
       self.writer_.close();

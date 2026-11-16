@@ -7,6 +7,9 @@ classdef MockDynamicNDArraysWriter < matlab.mixin.Copyable & test_model.DynamicN
     expected_simple_record_array
     expected_record_with_vlens_array
     expected_record_with_dynamic_nd_arrays
+    expected_rec_with_fixed_vectors_array
+    expected_rec_with_optional_fields_array
+    expected_rec_with_strings_array
   end
 
   methods
@@ -16,6 +19,9 @@ classdef MockDynamicNDArraysWriter < matlab.mixin.Copyable & test_model.DynamicN
       self.expected_simple_record_array = yardl.None;
       self.expected_record_with_vlens_array = yardl.None;
       self.expected_record_with_dynamic_nd_arrays = yardl.None;
+      self.expected_rec_with_fixed_vectors_array = yardl.None;
+      self.expected_rec_with_optional_fields_array = yardl.None;
+      self.expected_rec_with_strings_array = yardl.None;
     end
 
     function expect_write_ints_(self, value)
@@ -34,11 +40,26 @@ classdef MockDynamicNDArraysWriter < matlab.mixin.Copyable & test_model.DynamicN
       self.expected_record_with_dynamic_nd_arrays = yardl.Optional(value);
     end
 
+    function expect_write_rec_with_fixed_vectors_array_(self, value)
+      self.expected_rec_with_fixed_vectors_array = yardl.Optional(value);
+    end
+
+    function expect_write_rec_with_optional_fields_array_(self, value)
+      self.expected_rec_with_optional_fields_array = yardl.Optional(value);
+    end
+
+    function expect_write_rec_with_strings_array_(self, value)
+      self.expected_rec_with_strings_array = yardl.Optional(value);
+    end
+
     function verify(self)
       self.testCase_.verifyEqual(self.expected_ints, yardl.None, "Expected call to write_ints_ was not received");
       self.testCase_.verifyEqual(self.expected_simple_record_array, yardl.None, "Expected call to write_simple_record_array_ was not received");
       self.testCase_.verifyEqual(self.expected_record_with_vlens_array, yardl.None, "Expected call to write_record_with_vlens_array_ was not received");
       self.testCase_.verifyEqual(self.expected_record_with_dynamic_nd_arrays, yardl.None, "Expected call to write_record_with_dynamic_nd_arrays_ was not received");
+      self.testCase_.verifyEqual(self.expected_rec_with_fixed_vectors_array, yardl.None, "Expected call to write_rec_with_fixed_vectors_array_ was not received");
+      self.testCase_.verifyEqual(self.expected_rec_with_optional_fields_array, yardl.None, "Expected call to write_rec_with_optional_fields_array_ was not received");
+      self.testCase_.verifyEqual(self.expected_rec_with_strings_array, yardl.None, "Expected call to write_rec_with_strings_array_ was not received");
     end
   end
 
@@ -65,6 +86,24 @@ classdef MockDynamicNDArraysWriter < matlab.mixin.Copyable & test_model.DynamicN
       self.testCase_.verifyTrue(self.expected_record_with_dynamic_nd_arrays.has_value(), "Unexpected call to write_record_with_dynamic_nd_arrays_");
       self.testCase_.verifyEqual(value, self.expected_record_with_dynamic_nd_arrays.value, "Unexpected argument value for call to write_record_with_dynamic_nd_arrays_");
       self.expected_record_with_dynamic_nd_arrays = yardl.None;
+    end
+
+    function write_rec_with_fixed_vectors_array_(self, value)
+      self.testCase_.verifyTrue(self.expected_rec_with_fixed_vectors_array.has_value(), "Unexpected call to write_rec_with_fixed_vectors_array_");
+      self.testCase_.verifyEqual(value, self.expected_rec_with_fixed_vectors_array.value, "Unexpected argument value for call to write_rec_with_fixed_vectors_array_");
+      self.expected_rec_with_fixed_vectors_array = yardl.None;
+    end
+
+    function write_rec_with_optional_fields_array_(self, value)
+      self.testCase_.verifyTrue(self.expected_rec_with_optional_fields_array.has_value(), "Unexpected call to write_rec_with_optional_fields_array_");
+      self.testCase_.verifyEqual(value, self.expected_rec_with_optional_fields_array.value, "Unexpected argument value for call to write_rec_with_optional_fields_array_");
+      self.expected_rec_with_optional_fields_array = yardl.None;
+    end
+
+    function write_rec_with_strings_array_(self, value)
+      self.testCase_.verifyTrue(self.expected_rec_with_strings_array.has_value(), "Unexpected call to write_rec_with_strings_array_");
+      self.testCase_.verifyEqual(value, self.expected_rec_with_strings_array.value, "Unexpected argument value for call to write_rec_with_strings_array_");
+      self.expected_rec_with_strings_array = yardl.None;
     end
 
     function close_(self)
