@@ -50,6 +50,7 @@ find_package(xtensor ${XTENSOR_MINIMUM_VERSION} REQUIRED)
 	if options.GenerateHDF5 {
 		fmt.Fprintf(w, `
 option(%s_USE_HDF5 "Whether to use HDF5 in the generated code" ON)
+set(%s_USE_HDF5 ${%s_USE_HDF5} PARENT_SCOPE)
 if(%s_USE_HDF5)
 	set(HDF5_MINIMUM_VERSION "1.10.5")
 	find_package(HDF5 ${HDF5_MINIMUM_VERSION} REQUIRED COMPONENTS CXX)
@@ -57,12 +58,13 @@ if(%s_USE_HDF5)
 	list(APPEND %s_SOURCES hdf5/protocols.cc)
 	list(APPEND %s_LINK_LIBRARIES HDF5::HDF5)
 endif()
-`, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix)
+`, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix)
 	}
 
 	if options.GenerateNDJson {
 		fmt.Fprintf(w, `
 option(%s_USE_NDJSON "Whether to use NDJSON in the generated code" ON)
+set(%s_USE_NDJSON ${%s_USE_NDJSON} PARENT_SCOPE)
 if(%s_USE_NDJSON)
 	set(NLOHMANN_JSON_MINIMUM_VERSION "3.11.1")
 	find_package(nlohmann_json ${NLOHMANN_JSON_MINIMUM_VERSION} REQUIRED)
@@ -70,7 +72,7 @@ if(%s_USE_NDJSON)
 	list(APPEND %s_SOURCES ndjson/protocols.cc)
 	list(APPEND %s_LINK_LIBRARIES nlohmann_json::nlohmann_json)
 endif()
-`, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix)
+`, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix, cmakePrefix)
 	}
 
 	w.WriteStringln("")
