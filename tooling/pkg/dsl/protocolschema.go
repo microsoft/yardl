@@ -14,6 +14,7 @@ type ProtocolSchema struct {
 }
 
 func GetProtocolSchema(protocol *ProtocolDefinition, symbolTable SymbolTable) *ProtocolSchema {
+	baseNamespace := protocol.Namespace
 	schema := &ProtocolSchema{Protocol: removeComments(protocol)}
 	visitedTypeDefinitions := make(map[TypeDefinition]any)
 	Visit(protocol, func(self Visitor, node Node) {
@@ -39,7 +40,7 @@ func GetProtocolSchema(protocol *ProtocolDefinition, symbolTable SymbolTable) *P
 				t = &clone
 			}
 
-			schema.Types = append(schema.Types, removeComments(t))
+			schema.Types = append(schema.Types, qualifyImportedName(removeComments(t), baseNamespace))
 
 		case *SimpleType:
 			self.Visit(symbolTable.GetGenericTypeDefinition(t.ResolvedDefinition))
@@ -56,6 +57,41 @@ func GetProtocolSchema(protocol *ProtocolDefinition, symbolTable SymbolTable) *P
 	})
 
 	return schema
+}
+
+// qualifyImportedName ensures the definition's serialized name uniquely
+// identifies it in the embedded schema. Definitions from the protocol's own
+// namespace keep their unqualified name (preserving existing schema strings
+// for models that don't cross namespaces). Definitions from other namespaces
+// are rewritten to use their fully-qualified name so that consumers which
+// resolve types by name can disambiguate cross-namespace collisions.
+func qualifyImportedName(t TypeDefinition, baseNamespace string) TypeDefinition {
+	meta := t.GetDefinitionMeta()
+	if meta.Namespace == "" || meta.Namespace == baseNamespace {
+		return t
+	}
+	qualified := meta.GetQualifiedName()
+	if meta.Name == qualified {
+		return t
+	}
+	newMeta := *meta
+	newMeta.Name = qualified
+	switch v := t.(type) {
+	case *RecordDefinition:
+		clone := *v
+		clone.DefinitionMeta = &newMeta
+		return &clone
+	case *NamedType:
+		clone := *v
+		clone.DefinitionMeta = &newMeta
+		return &clone
+	case *EnumDefinition:
+		clone := *v
+		clone.DefinitionMeta = &newMeta
+		return &clone
+	default:
+		return t
+	}
 }
 
 func removeComments[T Node](typeDefinition T) T {

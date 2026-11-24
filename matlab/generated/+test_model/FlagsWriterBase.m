@@ -58,7 +58,7 @@ classdef (Abstract) FlagsWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"Flags","sequence":[{"name":"days","type":{"stream":{"items":"TestModel.DaysOfWeek"}}},{"name":"formats","type":{"stream":{"items":"TestModel.TextFormat"}}}]},"types":[{"name":"DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]}');
+      res = string('{"protocol":{"name":"Flags","sequence":[{"name":"days","type":{"stream":{"items":"TestModel.DaysOfWeek"}}},{"name":"formats","type":{"stream":{"items":"TestModel.TextFormat"}}}]},"types":[{"name":"BasicTypes.DaysOfWeek","values":[{"symbol":"monday","value":1},{"symbol":"tuesday","value":2},{"symbol":"wednesday","value":4},{"symbol":"thursday","value":8},{"symbol":"friday","value":16},{"symbol":"saturday","value":32},{"symbol":"sunday","value":64}]},{"name":"BasicTypes.TextFormat","base":"uint64","values":[{"symbol":"regular","value":0},{"symbol":"bold","value":1},{"symbol":"italic","value":2},{"symbol":"underline","value":4},{"symbol":"strikethrough","value":8}]},{"name":"DaysOfWeek","type":"BasicTypes.DaysOfWeek"},{"name":"TextFormat","type":"BasicTypes.TextFormat"}]}');
     end
   end
 
