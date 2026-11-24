@@ -40,7 +40,7 @@ classdef (Abstract) BenchmarkSmallRecordWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"BenchmarkSmallRecord","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SmallBenchmarkRecord"}}}]},"types":[{"name":"SmallBenchmarkRecord","fields":[{"name":"a","type":"float64"},{"name":"b","type":"float32"},{"name":"c","type":"float32"}]}]}');
+      res = string('{"protocol":{"name":"BenchmarkSmallRecord","sequence":[{"name":"smallRecord","type":{"stream":{"items":"TestModel.SmallBenchmarkRecord"}}}]},"types":[{"record":{"name":"SmallBenchmarkRecord","fields":[{"name":"a","type":"float64"},{"name":"b","type":"float32"},{"name":"c","type":"float32"}]}}]}');
     end
   end
 

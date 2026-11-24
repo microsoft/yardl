@@ -62,7 +62,7 @@ classdef (Abstract) VlensWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"Vlens","sequence":[{"name":"intVector","type":{"vector":{"items":"int32"}}},{"name":"complexVector","type":{"vector":{"items":"complexfloat32"}}},{"name":"recordWithVlens","type":"TestModel.RecordWithVlens"},{"name":"vlenOfRecordWithVlens","type":{"vector":{"items":"TestModel.RecordWithVlens"}}}]},"types":[{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
+      res = string('{"protocol":{"name":"Vlens","sequence":[{"name":"intVector","type":{"vector":{"items":"int32"}}},{"name":"complexVector","type":{"vector":{"items":"complexfloat32"}}},{"name":"recordWithVlens","type":"TestModel.RecordWithVlens"},{"name":"vlenOfRecordWithVlens","type":{"vector":{"items":"TestModel.RecordWithVlens"}}}]},"types":[{"record":{"name":"RecordWithVlens","fields":[{"name":"a","type":{"vector":{"items":"TestModel.SimpleRecord"}}},{"name":"b","type":"int32"},{"name":"c","type":"int32"}]}},{"record":{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}}]}');
     end
   end
 

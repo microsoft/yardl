@@ -32,7 +32,7 @@ classdef (Abstract) OptionalVectorsWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"OptionalVectors","sequence":[{"name":"recordWithOptionalVector","type":"TestModel.RecordWithOptionalVector"}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]}');
+      res = string('{"protocol":{"name":"OptionalVectors","sequence":[{"name":"recordWithOptionalVector","type":"TestModel.RecordWithOptionalVector"}]},"types":[{"record":{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}}]}');
     end
   end
 

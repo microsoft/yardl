@@ -62,7 +62,7 @@ classdef (Abstract) ScalarOptionalsWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"ScalarOptionals","sequence":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalRecord","type":[null,"TestModel.SimpleRecord"]},{"name":"recordWithOptionalFields","type":"TestModel.RecordWithOptionalFields"},{"name":"optionalRecordWithOptionalFields","type":[null,"TestModel.RecordWithOptionalFields"]}]},"types":[{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]},{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}]}');
+      res = string('{"protocol":{"name":"ScalarOptionals","sequence":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalRecord","type":[null,"TestModel.SimpleRecord"]},{"name":"recordWithOptionalFields","type":"TestModel.RecordWithOptionalFields"},{"name":"optionalRecordWithOptionalFields","type":[null,"TestModel.RecordWithOptionalFields"]}]},"types":[{"record":{"name":"RecordWithOptionalFields","fields":[{"name":"optionalInt","type":[null,"int32"]},{"name":"optionalIntAlternateSyntax","type":[null,"int32"]},{"name":"optionalTime","type":[null,"time"]}]}},{"record":{"name":"SimpleRecord","fields":[{"name":"x","type":"int32"},{"name":"y","type":"int32"},{"name":"z","type":"int32"}]}}]}');
     end
   end
 

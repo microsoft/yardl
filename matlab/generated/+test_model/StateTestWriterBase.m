@@ -60,7 +60,7 @@ classdef (Abstract) StateTestWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"StateTest","sequence":[{"name":"anInt","type":"int32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"anotherInt","type":"int32"}]},"types":null}');
+      res = string('{"protocol":{"name":"StateTest","sequence":[{"name":"anInt","type":"int32"},{"name":"aStream","type":{"stream":{"items":"int32"}}},{"name":"anotherInt","type":"int32"}]},"types":[]}');
     end
   end
 

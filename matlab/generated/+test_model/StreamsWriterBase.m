@@ -94,7 +94,7 @@ classdef (Abstract) StreamsWriterBase < handle
 
   methods (Static)
     function res = schema()
-      res = string('{"protocol":{"name":"Streams","sequence":[{"name":"intData","type":{"stream":{"items":"int32"}}},{"name":"optionalIntData","type":{"stream":{"items":[null,"int32"]}}},{"name":"recordWithOptionalVectorData","type":{"stream":{"items":"TestModel.RecordWithOptionalVector"}}},{"name":"fixedVector","type":{"stream":{"items":{"vector":{"items":"int32","length":3}}}}}]},"types":[{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}]}');
+      res = string('{"protocol":{"name":"Streams","sequence":[{"name":"intData","type":{"stream":{"items":"int32"}}},{"name":"optionalIntData","type":{"stream":{"items":[null,"int32"]}}},{"name":"recordWithOptionalVectorData","type":{"stream":{"items":"TestModel.RecordWithOptionalVector"}}},{"name":"fixedVector","type":{"stream":{"items":{"vector":{"items":"int32","length":3}}}}}]},"types":[{"record":{"name":"RecordWithOptionalVector","fields":[{"name":"optionalVector","type":[null,{"vector":{"items":"int32"}}]}]}}]}');
     end
   end
 
